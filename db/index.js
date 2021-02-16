@@ -34,11 +34,15 @@ Employee.init(
 Department.belongsTo(Employee, { as: "manager" });
 Employee.hasMany(Department, { foreignKey: "managerId" });
 
+Employee.belongsTo(Employee, { as: "supervisor" });
+Employee.hasMany(Employee, { foreignKey: "supervisorId", as: "supervisees" });
+
 const syncAndSeed = async () => {
   await db.sync({ force: true });
-  const [moe, lucy] = await Promise.all([
+  const [moe, lucy, larry] = await Promise.all([
     Employee.create({ name: "moe" }),
     Employee.create({ name: "lucy" }),
+    Employee.create({ name: "larry" }),
   ]);
   const [hr, engineering] = await Promise.all([
     Department.create({ name: "hr" }),
@@ -47,6 +51,9 @@ const syncAndSeed = async () => {
 
   hr.managerId = lucy.id;
   await hr.save();
+  moe.supervisorId = lucy.id;
+  larry.supervisorId = lucy.id;
+  await Promise.all([moe.save(), larry.save()]);
 };
 
 module.exports = {
@@ -54,6 +61,6 @@ module.exports = {
   syncAndSeed,
   model: {
     Employee,
-    Department
-  }
+    Department,
+  },
 };

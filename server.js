@@ -9,7 +9,21 @@ const app = express();
 
 app.get("/api/employees", async (req, res, next) => {
   try {
-    // res.send(await )
+    res.send(
+      await Employee.findAll({
+        include: [
+          {
+            model: Employee,
+            as: "supervisor",
+          },
+          {
+            model: Employee,
+            as: "supervisees",
+          },
+          Department,
+        ],
+      })
+    );
   } catch (error) {
     next(error);
   }
